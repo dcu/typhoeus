@@ -107,6 +107,13 @@ module Typhoeus
       @password         = options[:password]
       @auth_method      = options[:auth_method]
 
+      if @method == :post
+        @params = @params ? Typhoeus::Utils.escape_params(@params) : nil
+        @url = url
+      end
+
+      @parsed_uri = URI.parse(@url)
+
       @on_complete      = nil
       @after_complete   = nil
       @handled_response = nil

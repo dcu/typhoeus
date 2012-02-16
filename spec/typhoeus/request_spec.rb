@@ -153,6 +153,71 @@ describe Typhoeus::Request do
         request.params_string.should eq("a%5Bb%5D%5Bc%5D=d&a%5Bb%5D%5Bc%5D=e")
       end
     end
+
+    context 'parsing params' do
+      describe "#params_string" do
+        it "should dump a sorted string" do
+          request = Typhoeus::Request.new(
+            "http://google.com",
+            :params => {
+              'b' => 'fdsa',
+              'a' => 'jlk',
+              'c' => '789'
+            }
+          )
+
+          request.params_string.should == "a=jlk&b=fdsa&c=789"
+        end
+
+        it "should accept symboled keys" do
+          request = Typhoeus::Request.new('http://google.com',
+                                          :params => {
+                                            :b => 'fdsa',
+                                            :a => 'jlk',
+                                            :c => '789'
+                                          })
+          request.params_string.should == "a=jlk&b=fdsa&c=789"
+        end
+
+        it "should translate params with values that are arrays to the proper format" do
+          request = Typhoeus::Request.new('http://google.com',
+                                          :params => {
+                                            :a => ['789','2434']
+                                          })
+          request.params_string.should == "a=789&a=2434"
+        end
+
+        it "should allow the newer bracket notation for array params" do
+          request = Typhoeus::Request.new('http://google.com',
+                                          :params => {
+                                            "a[]" => ['789','2434']
+                                          })
+          request.params_string.should == "a%5B%5D=789&a%5B%5D=2434"
+        end
+
+        it "should nest arrays in hashes" do
+          request = Typhoeus::Request.new('http://google.com',
+                                          :params => {
+                                            :a => { :b => { :c => ['d','e'] } }
+                                          })
+          request.params_string.should == "a%5Bb%5D%5Bc%5D=d&a%5Bb%5D%5Bc%5D=e"
+        end
+
+        it "should translate nested params correctly" do
+          request = Typhoeus::Request.new('http://google.com',
+                                          :params => {
+                                            :a => { :b => { :c => 'd' } }
+                                          })
+          request.params_string.should == "a%5Bb%5D%5Bc%5D=d"
+        end
+      end
+      describe '#new' do
+        it 'parses query parameters for a POST request' do
+          request = Typhoeus::Request.new("http://localhost:3000", :params => {:q => "hello & there" }, :method => :post)
+          request.params.should == { "q" => "hello+%26+there" }
+        end
+      end
+    end
   end
 
   describe "quick request methods" do
