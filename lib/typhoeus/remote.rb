@@ -195,6 +195,8 @@ module Typhoeus
       easy.params                = options[:params] if options[:params]
       easy.request_body          = options[:body] if options[:body]
       easy.timeout               = options[:timeout] if options[:timeout]
+      easy.follow_location       = options[:follow_location] if options[:follow_location]
+      easy.max_redirects         = options[:max_redirects] if options[:max_redirects]
       easy.set_headers
       
       proxy = Typhoeus::RemoteProxyObject.new(clear_memoized_proxy_objects, easy, options)
@@ -282,6 +284,8 @@ module Typhoeus
       args[:on_failure] ||= @remote_defaults[:on_failure]
       args[:base_uri]   ||= @remote_defaults[:base_uri]
       args[:path]       ||= @remote_defaults[:path]
+      args[:follow_location] ||= @remote_defaults[:follow_location]
+      args[:follow_location] ||= @remote_defaults[:max_redirects]
       m = RemoteMethod.new(args)
 
       @remote_methods ||= {}

@@ -4,7 +4,7 @@ module Typhoeus
     
     def initialize(options = {})
       @http_method       = options.delete(:method) || :get
-      @options           = options
+      @options           = options.dup
       @base_uri          = options.delete(:base_uri)
       @path              = options.delete(:path)
       @on_success        = options[:on_success]
