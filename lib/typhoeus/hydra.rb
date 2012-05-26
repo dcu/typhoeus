@@ -64,7 +64,7 @@ module Typhoeus
         @queued_requests << request
       else
         if request.method == :get
-          if @memoize_requests && @memoized_requests.has_key?(request.url)
+          if @memoize_requests && @memoized_requests.key?(request.url)
             if response = @retrieved_from_cache[request.url]
               request.response = response
               request.call_handlers
@@ -120,6 +120,8 @@ module Typhoeus
       @on_complete = proc
     end
 
+    private
+
     def get_from_cache_or_queue(request)
       if @cache_getter
         val = @cache_getter.call(request)
@@ -134,7 +136,6 @@ module Typhoeus
         @multi.add(get_easy_object(request))
       end
     end
-    private :get_from_cache_or_queue
 
     def get_easy_object(request)
       @running_requests += 1
@@ -143,27 +144,27 @@ module Typhoeus
       easy.verbose          = request.verbose
       if request.username || request.password
         auth = { :username => request.username, :password => request.password }
-        auth[:method] = Typhoeus::Easy::AUTH_TYPES["CURLAUTH_#{request.auth_method.to_s.upcase}".to_sym] if request.auth_method
+        auth[:method] = request.auth_method if request.auth_method
         easy.auth = auth
       end
 
       if request.proxy
         proxy = { :server => request.proxy }
-        proxy[:type] = Typhoeus::Easy::PROXY_TYPES["CURLPROXY_#{request.proxy_type.to_s.upcase}".to_sym] if request.proxy_type
+        proxy[:type] = request.proxy_type if request.proxy_type
         easy.proxy = proxy if request.proxy
       end
 
       if request.proxy_username || request.proxy_password
         auth = { :username => request.proxy_username, :password => request.proxy_password }
-        auth[:method] = Typhoeus::Easy::AUTH_TYPES["CURLAUTH_#{request.proxy_auth_method.to_s.upcase}".to_sym] if request.proxy_auth_method
+        auth[:method] = request.proxy_auth_method if request.proxy_auth_method
         easy.proxy_auth = auth
       end
 
       easy.url          = request.url
       easy.method       = request.method
-      easy.params       = request.params  if request.method == :post && !request.params.nil?
+      easy.params       = request.params  if request.method == :post && request.params.present?
       easy.headers      = request.headers if request.headers
-      easy.request_body = request.body    if request.body
+      easy.request_body = request.body    if request.method == :post && request.body.present?
       easy.timeout      = request.timeout if request.timeout
       easy.connect_timeout = request.connect_timeout if request.connect_timeout
       easy.interface       = request.interface if request.interface
@@ -194,19 +195,16 @@ module Typhoeus
       easy.set_headers
       easy
     end
-    private :get_easy_object
 
     def queue_next
       @running_requests -= 1
       queue(@queued_requests.shift) unless @queued_requests.empty?
     end
-    private :queue_next
 
     def release_easy_object(easy)
       easy.reset
       @easy_pool.push easy
     end
-    private :release_easy_object
 
     def handle_request(request, response, live_request = true)
       request.response = response
@@ -227,7 +225,6 @@ module Typhoeus
         end
       end
     end
-    private :handle_request
 
     def response_from_easy(easy, request)
       Response.new(:code                => easy.response_code,
@@ -245,6 +242,5 @@ module Typhoeus
                    :curl_error_message => easy.curl_error_message,
                    :request             => request)
     end
-    private :response_from_easy
   end
 end
