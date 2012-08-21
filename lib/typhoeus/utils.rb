@@ -1,3 +1,5 @@
+require 'cgi'
+
 module Typhoeus
   module Utils
     # Taken from Rack::Utils, 1.2.1 to remove Rack dependency.
@@ -10,7 +12,7 @@ module Typhoeus
 
     def escape_params(params)
       traverse_params_hash(params)[:params].inject({}) do |memo, (k, v)|
-        memo[escape(k)] = escape(v)
+        memo[escape(k)] = CGI.escape(v)
         memo
       end
     end
@@ -24,7 +26,7 @@ module Typhoeus
 
     def traversal_to_param_string(traversal, escape = true)
       traversal[:params].collect { |param|
-        escape ? "#{Typhoeus::Utils.escape(param[0])}=#{Typhoeus::Utils.escape(param[1])}" : "#{param[0]}=#{param[1]}"
+        escape ? "#{Typhoeus::Utils.escape(param[0])}=#{CGI.escape(param[1])}" : "#{param[0]}=#{param[1]}"
       }.join('&')
     end
     module_function :traversal_to_param_string

@@ -6,7 +6,8 @@ module Typhoeus
     attr_reader :first, :traversal
 
     def initialize(params = {})
-      @params = params
+      # ideally we should escape params here with Typhoeus::Utils.escape_params. I don't do it in this commit because I don't know the implications yet.
+      @params = params 
       @first = ::FFI::MemoryPointer.new(:pointer)
       @last = ::FFI::MemoryPointer.new(:pointer)
 

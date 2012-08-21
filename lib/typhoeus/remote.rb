@@ -192,7 +192,7 @@ module Typhoeus
       easy.method                = method
       easy.headers               = options[:headers] if options.has_key?(:headers)
       easy.headers["User-Agent"] = (options[:user_agent] || Typhoeus::USER_AGENT)
-      easy.params                = options[:params] if options[:params]
+      easy.params                = Typhoeus::Utils.escape_params(options[:params]) if options[:params]
       easy.request_body          = options[:body] if options[:body]
       easy.timeout               = options[:timeout] if options[:timeout]
       easy.follow_location       = options[:follow_location] if options[:follow_location]
@@ -285,7 +285,10 @@ module Typhoeus
       args[:base_uri]   ||= @remote_defaults[:base_uri]
       args[:path]       ||= @remote_defaults[:path]
       args[:follow_location] ||= @remote_defaults[:follow_location]
-      args[:follow_location] ||= @remote_defaults[:max_redirects]
+      args[:max_redirects] ||= @remote_defaults[:max_redirects]
+      args[:params] ||= @remote_defaults[:params]
+      args[:username] ||= @remote_defaults[:username]
+      args[:password] ||= @remote_defaults[:password]
       m = RemoteMethod.new(args)
 
       @remote_methods ||= {}
