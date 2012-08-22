@@ -286,9 +286,10 @@ module Typhoeus
       args[:path]       ||= @remote_defaults[:path]
       args[:follow_location] ||= @remote_defaults[:follow_location]
       args[:max_redirects] ||= @remote_defaults[:max_redirects]
-      args[:params] ||= @remote_defaults[:params]
-      args[:username] ||= @remote_defaults[:username]
-      args[:password] ||= @remote_defaults[:password]
+      args[:params] ||= @remote_defaults[:params] if @remote_defaults[:params]
+      args[:username] ||= @remote_defaults[:username] if @remote_defaults[:username]
+      args[:password] ||= @remote_defaults[:password] if @remote_defaults[:password]
+
       m = RemoteMethod.new(args)
 
       @remote_methods ||= {}

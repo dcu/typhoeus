@@ -11,6 +11,8 @@ module Typhoeus
     module_function :escape
 
     def escape_params(params)
+      return {} if params.nil?
+
       traverse_params_hash(params)[:params].inject({}) do |memo, (k, v)|
         memo[escape(k)] = CGI.escape(v)
         memo
